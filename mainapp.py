@@ -12,7 +12,7 @@ Aplikasi ini menyediakan dua analisis:
 """)
 
 anak_dt = joblib.load("anak_decision_tree.pkl")
-anak_rf = joblib.load("anak_random_forest.pkl")
+anak_rf = joblib.load("anak_random_forest_compressed.pkl")
 anak_scaler = joblib.load("anak_scaler.pkl")
 
 ibu_dt = joblib.load("ibu_decision_tree.pkl")
