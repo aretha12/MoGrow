@@ -6,9 +6,9 @@ st.set_page_config(page_title="Prediksi Stunting & Risiko Ibu", layout="centered
 st.title("Sistem Prediksi Stunting Anak & Risiko Kesehatan Ibu")
 
 st.markdown("""
-\nAplikasi ini menyediakan dua analisis:
-\n1️⃣ Prediksi Stunting Balita  
-\n2️⃣ Prediksi Risiko Kesehatan Ibu Hamil
+Aplikasi ini menyediakan dua analisis:
+1️⃣ Prediksi Stunting Balita  
+2️⃣ Prediksi Risiko Kesehatan Ibu Hamil
 """)
 
 anak_dt = joblib.load("anak_decision_tree.pkl")
@@ -44,13 +44,12 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     data_scaled = anak_scaler.transform(data)
 
     model_choice = st.radio("Model:", ["Decision Tree", "Random Forest"])
+    model = anak_dt if model_choice == "Decision Tree" else anak_rf
 
     if st.button("Prediksi Stunting"):
-        model = anak_dt if model_choice == "Decision Tree" else anak_rf
         pred = model.predict(data_scaled)[0]
-        proba = model.predict_proba(data_scaled)[0][1] * 100
-
-        st.metric("Akurasi Model", f"{model.score(anak_scaler.transform(data), model.predict(data))*100:.2f}%")
+        akurasi = model.score(anak_scaler.transform(data), model.predict(data))
+        st.metric("Akurasi Model", f"{akurasi*100:.2f}%")
 
         if pred == 1:
             st.error("⚠️ Anak terindikasi Stunting.")
@@ -64,13 +63,13 @@ if menu == "👶🏻 Prediksi Stunting Anak":
             - Tingkatkan asupan protein (telur, ikan, ayam, tempe, tahu)  
             - Tambahkan buah & sayuran  
             - Periksa pertumbuhan rutin di posyandu  
-            - Perbaiki sanitasi  
+            - Perbaiki sanitasi lingkungan  
             - Konsultasi dokter bila pertumbuhan stagnan  
             """)
         else:
             st.markdown("""
             - Jaga pola makan seimbang  
-            - Batasi makanan manis  
+            - Batasi makanan manis dan instan  
             - Kontrol rutin di posyandu  
             - Berikan stimulasi perkembangan  
             - Pastikan tidur cukup  
@@ -90,12 +89,12 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
     data_scaled = ibu_scaler.transform(data)
 
     model_choice = st.radio("Model:", ["Decision Tree", "Random Forest"])
+    model = ibu_dt if model_choice == "Decision Tree" else ibu_rf
 
     if st.button("Prediksi Risiko Ibu"):
-        model = ibu_dt if model_choice == "Decision Tree" else ibu_rf
         pred = model.predict(data_scaled)[0]
-
-        st.metric("Akurasi Model", f"{model.score(ibu_scaler.transform(data), model.predict(data))*100:.2f}%")
+        akurasi = model.score(ibu_scaler.transform(data), model.predict(data))
+        st.metric("Akurasi Model", f"{akurasi*100:.2f}%")
 
         if pred == 0:
             st.success("Risiko Rendah 🟢")
@@ -116,13 +115,13 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
         elif pred == 1:
             st.markdown("""
             - Pantau tekanan darah  
-            - Kurangi gula  
+            - Kurangi konsumsi gula  
             - Istirahat cukup  
             - Hindari stres  
             """)
         else:
             st.markdown("""
-            - Konsultasi dokter segera  
+            - Segera konsultasi ke dokter  
             - Pantau tekanan darah & gula darah  
             - Hindari aktivitas berat  
             - Waspadai gejala bahaya  
