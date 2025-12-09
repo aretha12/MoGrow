@@ -24,7 +24,7 @@ menu = st.sidebar.radio(
     ["👶🏻 Prediksi Stunting Anak", "🤰🏻 Prediksi Risiko Kesehatan Ibu"]
 )
 
-if menu == "Prediksi Stunting Anak 👶🏻":
+if menu == "👶🏻 Prediksi Stunting Anak":
     st.header("Prediksi Stunting Anak 👶🏻")
 
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
@@ -76,7 +76,7 @@ if menu == "Prediksi Stunting Anak 👶🏻":
             - Pastikan tidur cukup  
             """)
 
-elif menu == "Prediksi Risiko Kesehatan Ibu 🤰🏻":
+elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
     st.header("Prediksi Risiko Kesehatan Ibu 🤰🏻")
 
     age = st.number_input("Usia Ibu", 15, 50, 28)
