@@ -5,13 +5,13 @@ import joblib
 st.set_page_config(page_title="Prediksi Stunting & Risiko Ibu", layout="centered")
 st.title("Sistem Prediksi Stunting Anak & Risiko Kesehatan Ibu")
 
-st.markdown("""
-Aplikasi ini menyediakan dua analisis:/n
-/n1️⃣ Prediksi Stunting Pada Anak  
-/n2️⃣ Prediksi Risiko Kesehatan Ibu  
-""")
+st.markdown(
+"Aplikasi ini menyediakan dua analisis:\n"
+"1️⃣ Prediksi Stunting Pada Anak\n"
+"2️⃣ Prediksi Risiko Kesehatan Ibu\n" 
+)
 
-anak_rf = joblib.load("bayi_random_forest_compressed.pkl")
+anak_rf = joblib.load("bayi_random_forest.pkl")
 anak_scaler = joblib.load("bayi_scaler.pkl")
 
 ibu_rf = joblib.load("ibu_random_forest.pkl")
