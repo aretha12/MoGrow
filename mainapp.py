@@ -7,17 +7,18 @@ st.title("Sistem Prediksi Stunting Anak & Risiko Kesehatan Ibu")
 
 st.markdown("""
 Aplikasi ini menyediakan dua analisis:
-1️⃣ Prediksi Stunting Balita  
-2️⃣ Prediksi Risiko Kesehatan Ibu Hamil
+1️⃣ Prediksi Stunting Pada Anak  
+2️⃣ Prediksi Risiko Kesehatan Ibu  
 """)
 
-anak_dt = joblib.load("anak_decision_tree.pkl")
-anak_rf = joblib.load("anak_random_forest_compressed.pkl")
-anak_scaler = joblib.load("anak_scaler.pkl")
+anak_rf = joblib.load("bayi_random_forest_compressed.pkl")
+anak_scaler = joblib.load("bayi_scaler.pkl")
 
-ibu_dt = joblib.load("ibu_decision_tree.pkl")
 ibu_rf = joblib.load("ibu_random_forest.pkl")
 ibu_scaler = joblib.load("ibu_scaler.pkl")
+
+AKURASI_ANAK = 0.84     
+AKURASI_IBU = 0.8374
 
 menu = st.sidebar.radio(
     "Pilih Menu:",
@@ -28,13 +29,12 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     st.header("Prediksi Stunting Anak 👶🏻")
 
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
-
     gender = st.selectbox("Jenis Kelamin", list(gender_map.keys()))
     age = st.number_input("Usia Anak (bulan)", 0, 60, 12)
     birth_weight = st.number_input("Berat Lahir (kg)", 0.5, 5.0, 3.0)
-    birth_length = st.number_input("Panjang Lahir (cm)", 30.0, 60.0, 49.0)
+    birth_length = st.number_input("Panjang Lahir (cm)", 30, 60, 49)
     body_weight = st.number_input("Berat Badan Saat Ini (kg)", 1.0, 20.0, 10.0)
-    body_length = st.number_input("Tinggi Badan Saat Ini (cm)", 40.0, 120.0, 70.0)
+    body_length = st.number_input("Tinggi Badan Saat Ini (cm)", 40, 120, 70)
     breastfeeding = st.selectbox("ASI Eksklusif?", ["Ya", "Tidak"])
 
     bf = 1 if breastfeeding == "Ya" else 0
@@ -43,13 +43,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     data = np.array([[g, age, birth_weight, birth_length, body_weight, body_length, bf]])
     data_scaled = anak_scaler.transform(data)
 
-    model_choice = st.radio("Model:", ["Decision Tree", "Random Forest"])
-    model = anak_dt if model_choice == "Decision Tree" else anak_rf
-
     if st.button("Prediksi Stunting"):
-        pred = model.predict(data_scaled)[0]
-        akurasi = model.score(anak_scaler.transform(data), model.predict(data))
-        st.metric("Akurasi Model", f"{akurasi*100:.2f}%")
+        pred = anak_rf.predict(data_scaled)[0]
+
+        st.metric("Akurasi Model (Validasi)", f"{AKURASI_ANAK*100:.2f}%")
 
         if pred == 1:
             st.error("⚠️ Anak terindikasi Stunting.")
@@ -69,7 +66,7 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         else:
             st.markdown("""
             - Jaga pola makan seimbang  
-            - Batasi makanan manis dan instan  
+            - Kurangi makanan manis & instan  
             - Kontrol rutin di posyandu  
             - Berikan stimulasi perkembangan  
             - Pastikan tidur cukup  
@@ -88,13 +85,10 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
     data = np.array([[age, sys, dia, bs, temp, heart]])
     data_scaled = ibu_scaler.transform(data)
 
-    model_choice = st.radio("Model:", ["Decision Tree", "Random Forest"])
-    model = ibu_dt if model_choice == "Decision Tree" else ibu_rf
-
     if st.button("Prediksi Risiko Ibu"):
-        pred = model.predict(data_scaled)[0]
-        akurasi = model.score(ibu_scaler.transform(data), model.predict(data))
-        st.metric("Akurasi Model", f"{akurasi*100:.2f}%")
+        pred = ibu_rf.predict(data_scaled)[0]
+
+        st.metric("Akurasi Model (Validasi)", f"{AKURASI_IBU*100:.2f}%")
 
         if pred == 0:
             st.success("Risiko Rendah 🟢")
@@ -107,15 +101,15 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
 
         if pred == 0:
             st.markdown("""
-            - Makan seimbang  
-            - Minum cukup  
-            - Cek kehamilan rutin  
+            - Konsumsi makanan seimbang  
+            - Periksa kehamilan rutin  
+            - Minum air cukup  
             - Olahraga ringan  
             """)
         elif pred == 1:
             st.markdown("""
             - Pantau tekanan darah  
-            - Kurangi konsumsi gula  
+            - Kurangi makanan tinggi gula  
             - Istirahat cukup  
             - Hindari stres  
             """)
