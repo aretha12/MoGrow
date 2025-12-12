@@ -6,7 +6,7 @@ st.set_page_config(page_title="Prediksi Stunting & Risiko Ibu", layout="centered
 st.title("Sistem Prediksi Stunting Anak & Risiko Kesehatan Ibu")
 
 st.markdown(
-    "Aplikasi ini menyediakan dua analisis:  \n"
+    "**Aplikasi ini menyediakan dua analisis:**  \n"
     "1️⃣ Prediksi Stunting Pada Anak  \n"
     "2️⃣ Prediksi Risiko Kesehatan Ibu"
 )
@@ -17,8 +17,16 @@ anak_scaler = joblib.load("bayi_scaler.pkl")
 ibu_rf = joblib.load("ibu_random_forest.pkl")
 ibu_scaler = joblib.load("ibu_scaler.pkl")
 
-AKURASI_ANAK = 0.84     
+AKURASI_ANAK = 0.84
 AKURASI_IBU = 0.8374
+
+RANGE = {
+    "age": (0, 60),
+    "birth_weight": (1.0, 4.5),
+    "birth_length": (45, 55),
+    "body_weight": (2.0, 15.0),
+    "body_length": (45, 100)
+}
 
 menu = st.sidebar.radio(
     "Pilih Menu:",
@@ -33,12 +41,27 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     age = st.number_input("Usia Anak (bulan)", 0, 60, 12)
     birth_weight = st.number_input("Berat Lahir (kg)", 0.5, 5.0, 3.0)
     birth_length = st.number_input("Panjang Lahir (cm)", 30, 60, 49)
-    body_weight = st.number_input("Berat Badan Saat Ini (kg)", 1.0, 20.0, 10.0)
-    body_length = st.number_input("Tinggi Badan Saat Ini (cm)", 40, 120, 70)
+    body_weight = st.number_input("Berat Badan Saat Ini (kg)", 1.0, 25.0, 10.0)
+    body_length = st.number_input("Tinggi Badan Saat Ini (cm)", 40, 130, 70)
     breastfeeding = st.selectbox("ASI Eksklusif?", ["Ya", "Tidak"])
 
     bf = 1 if breastfeeding == "Ya" else 0
     g = gender_map[gender]
+
+    st.subheader("Peringatan Input")
+
+    if not (RANGE["birth_weight"][0] <= birth_weight <= RANGE["birth_weight"][1]):
+        st.warning("⚠️ *Berat lahir berada di luar rentang data asli (1.0–4.5 kg).*")
+
+    if not (RANGE["birth_length"][0] <= birth_length <= RANGE["birth_length"][1]):
+        st.warning("⚠️ *Panjang lahir berada di luar rentang data asli (45–55 cm).*")
+
+    if not (RANGE["body_weight"][0] <= body_weight <= RANGE["body_weight"][1]):
+        st.warning("⚠️ *Berat badan saat ini di luar rentang data (2–15 kg).* "
+                   "Hasil prediksi mungkin tidak akurat.")
+
+    if not (RANGE["body_length"][0] <= body_length <= RANGE["body_length"][1]):
+        st.warning("⚠️ *Tinggi badan berada di luar rentang data (45–100 cm).*")
 
     data = np.array([[g, age, birth_weight, birth_length, body_weight, body_length, bf]])
     data_scaled = anak_scaler.transform(data)
