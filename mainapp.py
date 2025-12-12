@@ -6,9 +6,9 @@ st.set_page_config(page_title="Prediksi Stunting & Risiko Ibu", layout="centered
 st.title("Sistem Prediksi Stunting Anak & Risiko Kesehatan Ibu")
 
 st.markdown("""
-Aplikasi ini menyediakan dua analisis:
-1️⃣ Prediksi Stunting Pada Anak  
-2️⃣ Prediksi Risiko Kesehatan Ibu  
+Aplikasi ini menyediakan dua analisis:/n
+/n1️⃣ Prediksi Stunting Pada Anak  
+/n2️⃣ Prediksi Risiko Kesehatan Ibu  
 """)
 
 anak_rf = joblib.load("bayi_random_forest_compressed.pkl")
