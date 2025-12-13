@@ -31,6 +31,16 @@ menu = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Developed with 💖 using Streamlit")
 
+def is_definitely_stunted(age, height):
+    if age >= 36:
+        return height < 90
+    elif age >= 24:
+        return height < 85
+    elif age >= 12:
+        return height < 75
+    else:
+        return False
+
 def is_growth_normal(age, height, weight):
     if age < 12:
         return height >= 70 and weight >= 7
@@ -46,8 +56,8 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     st.header("👶🏻 Prediksi Stunting Anak")
 
     st.markdown("""
-    Prediksi dilakukan menggunakan **machine learning (Random Forest)**  
-    dan **aturan pertumbuhan berbasis usia** untuk meningkatkan akurasi.
+    Prediksi dilakukan menggunakan pendekatan **hybrid**  
+    (aturan pertumbuhan berbasis usia + machine learning).
     """)
 
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
@@ -69,7 +79,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         data_scaled = anak_scaler.transform(data)
         pred_model = anak_model.predict(data_scaled)[0]
 
-        if is_growth_normal(age, body_length, body_weight):
+        if is_definitely_stunted(age, body_length):
+            final_pred = 1
+            decision_source = "Rule-based (stunting jelas berdasarkan usia & tinggi)"
+        elif is_growth_normal(age, body_length, body_weight):
             final_pred = 0
             decision_source = "Rule-based (pertumbuhan sesuai usia)"
         else:
@@ -86,8 +99,8 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         st.caption(f"Sumber keputusan: **{decision_source}**")
 
         st.info(
-            "Stunting ditentukan terutama oleh tinggi badan terhadap usia, "
-            "bukan oleh berat badan saja."
+            "Penilaian stunting difokuskan pada hubungan antara usia dan tinggi badan. "
+            "Aturan digunakan untuk mencegah kesalahan prediksi pada kasus ekstrem."
         )
 
         st.subheader("📊 Detail Input Anak")
@@ -104,8 +117,8 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
     st.header("🤰🏻 Prediksi Risiko Kesehatan Ibu")
 
     st.markdown("""
-    Prediksi risiko kesehatan ibu dilakukan berdasarkan **parameter klinis**
-    seperti tekanan darah, kadar gula darah, suhu tubuh, dan denyut jantung.
+    Prediksi risiko kesehatan ibu dilakukan berdasarkan parameter klinis
+    dan hasil model machine learning.
     """)
 
     age = st.number_input("Usia Ibu (tahun)", 15, 50, 28)
