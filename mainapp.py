@@ -31,14 +31,23 @@ menu = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Developed with 💖 using Streamlit")
 
+def is_growth_normal(age, height, weight):
+    if age < 12:
+        return height >= 70 and weight >= 7
+    elif age < 24:
+        return height >= 80 and weight >= 9
+    elif age < 36:
+        return height >= 85 and weight >= 11
+    else:
+        return height >= 95 and weight >= 12
+
 if menu == "👶🏻 Prediksi Stunting Anak":
 
     st.header("👶🏻 Prediksi Stunting Anak")
 
     st.markdown("""
     Prediksi dilakukan menggunakan **machine learning (Random Forest)**  
-    dan **aturan pertumbuhan (rule-based override)** untuk mencegah
-    kesalahan prediksi pada anak dengan pertumbuhan normal.
+    dan **aturan pertumbuhan berbasis usia** untuk meningkatkan akurasi.
     """)
 
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
@@ -60,15 +69,9 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         data_scaled = anak_scaler.transform(data)
         pred_model = anak_model.predict(data_scaled)[0]
 
-        is_override_normal = (
-            age >= 12 and
-            body_length >= 75 and
-            body_weight >= 9
-        )
-
-        if is_override_normal:
+        if is_growth_normal(age, body_length, body_weight):
             final_pred = 0
-            decision_source = "Rule-based override (pertumbuhan sesuai usia)"
+            decision_source = "Rule-based (pertumbuhan sesuai usia)"
         else:
             final_pred = pred_model
             decision_source = "Prediksi model machine learning"
@@ -83,23 +86,9 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         st.caption(f"Sumber keputusan: **{decision_source}**")
 
         st.info(
-            "Catatan: Stunting ditentukan terutama oleh tinggi badan terhadap usia, "
+            "Stunting ditentukan terutama oleh tinggi badan terhadap usia, "
             "bukan oleh berat badan saja."
         )
-
-        st.subheader("🩺 Rekomendasi Kesehatan Anak")
-
-        if final_pred == 1:
-            st.markdown(f"""
-            **Analisis:**  
-            Anak usia **{age} bulan** dengan tinggi **{body_length} cm**
-            menunjukkan risiko stunting.
-            """)
-        else:
-            st.markdown(f"""
-            **Analisis:**  
-            Pertumbuhan anak **normal** untuk usia **{age} bulan**.
-            """)
 
         st.subheader("📊 Detail Input Anak")
         col1, col2, col3 = st.columns(3)
