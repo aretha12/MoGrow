@@ -15,8 +15,8 @@ st.markdown(
     "2️⃣ Prediksi Risiko Kesehatan Ibu (Machine Learning)"
 )
 
-anak_model = joblib.load("cobaBayi_random_forest.pkl")
-anak_scaler = joblib.load("cobaBayi_scaler.pkl")
+anak_model = joblib.load("bayi_random_forest.pkl")
+anak_scaler = joblib.load("bayi_scaler.pkl")
 AKURASI_ANAK = 0.8712
 
 ibu_model = joblib.load("ibu_random_forest.pkl")
