@@ -17,12 +17,11 @@ st.markdown(
 
 anak_model = joblib.load("bayi_random_forest.pkl")
 anak_scaler = joblib.load("bayi_scaler.pkl")
-AKURASI_ANAK = 0.8712
+AKURASI_ANAK = 0.865
 
 ibu_model = joblib.load("ibu_random_forest.pkl")
 ibu_scaler = joblib.load("ibu_scaler.pkl")
-AKURASI_IBU = 0.8374
-
+AKURASI_IBU = 0.8473
 menu = st.sidebar.radio(
     "Pilih Menu:",
     ["👶🏻 Prediksi Stunting Anak", "🤰🏻 Prediksi Risiko Kesehatan Ibu"]
@@ -37,10 +36,9 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
     st.markdown("""
     Prediksi dilakukan menggunakan **machine learning (Random Forest)**  
-    dan **aturan pertumbuhan (rule-based override)** untuk menghindari
+    dan **aturan pertumbuhan (rule-based override)** untuk mencegah
     kesalahan prediksi pada anak dengan pertumbuhan normal.
     """)
-
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
     gender = st.selectbox("Jenis Kelamin", list(gender_map.keys()))
 
@@ -53,14 +51,11 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
     g = gender_map[gender]
     bf = 1 if breastfeeding == "Ya" else 0
-
-    if st.button("🔍 Prediksi Stunting"):
+    if st.button("🔍 Prediksi Stunting Anak"):
 
         data = np.array([[g, age, birth_weight, birth_length, body_weight, body_length, bf]])
         data_scaled = anak_scaler.transform(data)
-
         pred_model = anak_model.predict(data_scaled)[0]
-
         is_override_normal = (
             age >= 12 and
             body_length >= 75 and
@@ -118,26 +113,33 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
             💡 *Pertumbuhan optimal dipengaruhi gizi, stimulasi, dan pola asuh.*
             """)
-        st.subheader("📊 Detail Input")
+        st.subheader("📊 Detail Input Anak")
         col1, col2, col3 = st.columns(3)
         col1.metric("Usia", f"{age} bulan")
         col2.metric("Berat Badan", f"{body_weight} kg")
         col3.metric("Tinggi Badan", f"{body_length} cm")
 
     st.markdown("---")
-    st.caption("⚠️ Aplikasi ini hanya alat bantu skrining awal dan **tidak menggantikan diagnosis dokter**.")
-
+    st.caption(
+        "⚠️ Aplikasi ini hanya alat bantu skrining awal dan "
+        "**tidak menggantikan diagnosis dokter**."
+    )
 elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
 
     st.header("🤰🏻 Prediksi Risiko Kesehatan Ibu")
 
-    age = st.number_input("Usia Ibu", 15, 50, 28)
-    sys = st.number_input("Systolic BP", 80, 200, 120)
-    dia = st.number_input("Diastolic BP", 50, 130, 80)
+    st.markdown("""
+    Prediksi risiko kesehatan ibu dilakukan berdasarkan **parameter klinis**
+    seperti tekanan darah, kadar gula darah, suhu tubuh, dan denyut jantung.
+
+    Hasil prediksi digunakan sebagai **skrining awal**, bukan diagnosis medis.
+    """)
+    age = st.number_input("Usia Ibu (tahun)", 15, 50, 28)
+    sys = st.number_input("Systolic Blood Pressure (mmHg)", 80, 200, 120)
+    dia = st.number_input("Diastolic Blood Pressure (mmHg)", 50, 130, 80)
     bs = st.number_input("Blood Sugar", 1.0, 30.0, 7.0)
     temp = st.number_input("Temperatur Tubuh (°F)", 90.0, 110.0, 98.0)
-    heart = st.number_input("Heart Rate", 50, 200, 100)
-
+    heart = st.number_input("Heart Rate (bpm)", 50, 200, 100)
     if st.button("🔍 Prediksi Risiko Ibu"):
 
         data = np.array([[age, sys, dia, bs, temp, heart]])
@@ -145,34 +147,46 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
         pred = ibu_model.predict(data_scaled)[0]
 
         st.metric("Akurasi Model (Validasi)", f"{AKURASI_IBU*100:.2f}%")
-
         if pred == 0:
             st.success("🟢 Risiko Rendah")
+            st.caption("Kondisi vital ibu berada dalam batas aman.")
         elif pred == 1:
             st.warning("🟡 Risiko Sedang")
+            st.caption("Terdapat beberapa indikator yang perlu dipantau.")
         else:
             st.error("🔴 Risiko Tinggi")
-
+            st.caption("Parameter vital menunjukkan potensi risiko serius.")
         st.subheader("🩺 Saran Kesehatan Ibu")
 
         if pred == 0:
             st.markdown("""
             - Konsumsi makanan seimbang  
-            - Periksa kehamilan rutin  
-            - Minum air cukup  
-            - Olahraga ringan  
+            - Pemeriksaan kehamilan rutin  
+            - Minum air putih yang cukup  
+            - Olahraga ringan sesuai anjuran  
             """)
         elif pred == 1:
             st.markdown("""
-            - Pantau tekanan darah  
-            - Kurangi makanan tinggi gula  
+            - Pantau tekanan darah & gula darah  
+            - Kurangi konsumsi gula & garam  
             - Istirahat cukup  
-            - Hindari stres  
+            - Kelola stres dengan baik  
             """)
         else:
             st.markdown("""
-            - Segera konsultasi ke dokter  
-            - Pantau tekanan darah & gula darah  
+            - Segera konsultasi ke dokter atau bidan  
+            - Pantau tekanan darah & gula darah secara intensif  
             - Hindari aktivitas berat  
-            - Waspadai gejala bahaya  
+            - Waspadai tanda bahaya kehamilan  
             """)
+        st.subheader("📊 Ringkasan Data Ibu")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Usia", f"{age} tahun")
+        col2.metric("Tekanan Darah", f"{sys}/{dia} mmHg")
+        col3.metric("Gula Darah", f"{bs}")
+
+    st.markdown("---")
+    st.caption(
+        "⚠️ Hasil prediksi ini bersifat skrining awal dan "
+        "**tidak menggantikan pemeriksaan dokter atau bidan**."
+    )
