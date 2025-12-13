@@ -93,15 +93,31 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
         if final_pred == 1:
             st.error("⚠️ Anak **terindikasi stunting**.")
+            st.info(
+                "Hasil ini menunjukkan bahwa tinggi badan anak lebih rendah "
+                "dibandingkan standar pertumbuhan pada usia yang sama."
+            )
         else:
             st.success("✅ Anak **tidak stunting**.")
+            st.info(
+                "Pertumbuhan tinggi badan anak masih berada dalam rentang "
+                "yang sesuai dengan usianya."
+            )
 
         st.caption(f"Sumber keputusan: **{decision_source}**")
 
         st.info(
-            "Penilaian stunting difokuskan pada hubungan antara usia dan tinggi badan. "
-            "Aturan digunakan untuk mencegah kesalahan prediksi pada kasus ekstrem."
+            "Penilaian stunting berfokus pada hubungan antara usia dan tinggi badan. "
+            "Berat badan yang rendah saja belum tentu menunjukkan stunting."
         )
+
+        st.subheader("💡 Saran untuk Orang Tua")
+        st.markdown("""
+        - Pantau pertumbuhan anak secara rutin di posyandu  
+        - Pastikan asupan gizi seimbang, terutama protein hewani  
+        - Perhatikan kebersihan lingkungan dan sanitasi  
+        - Konsultasikan ke tenaga kesehatan jika pertumbuhan anak melambat  
+        """)
 
         st.subheader("📊 Detail Input Anak")
         col1, col2, col3 = st.columns(3)
@@ -148,12 +164,32 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
 
         if final_pred == 0:
             st.success("🟢 Risiko Rendah")
+            st.info(
+                "Kondisi kesehatan ibu saat ini relatif stabil "
+                "dan berada dalam batas aman."
+            )
         elif final_pred == 1:
             st.warning("🟡 Risiko Sedang")
+            st.info(
+                "Beberapa parameter kesehatan berada di atas batas normal "
+                "dan perlu dipantau secara berkala."
+            )
         else:
             st.error("🔴 Risiko Tinggi")
+            st.info(
+                "Beberapa parameter vital menunjukkan potensi risiko serius "
+                "dan memerlukan perhatian medis lebih lanjut."
+            )
 
         st.caption(f"Sumber keputusan: **{decision_note}**")
+
+        st.subheader("💡 Saran Umum")
+        st.markdown("""
+        - Lakukan pemeriksaan kesehatan secara rutin  
+        - Jaga pola makan seimbang dan hidrasi cukup  
+        - Istirahat yang cukup dan kelola stres  
+        - Segera konsultasi ke tenaga medis jika muncul keluhan  
+        """)
 
         st.subheader("📊 Ringkasan Data Ibu")
         col1, col2, col3 = st.columns(3)
