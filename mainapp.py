@@ -2,6 +2,9 @@ import streamlit as st
 import numpy as np
 import joblib
 
+# ======================================================
+# KONFIGURASI HALAMAN
+# ======================================================
 st.set_page_config(
     page_title="Sistem Prediksi Stunting & Kesehatan Ibu",
     layout="centered"
@@ -15,6 +18,9 @@ st.markdown(
     "2️⃣ Prediksi Risiko Kesehatan Ibu (Machine Learning)"
 )
 
+# ======================================================
+# LOAD MODEL
+# ======================================================
 anak_model = joblib.load("bayi_random_forest.pkl")
 anak_scaler = joblib.load("bayi_scaler.pkl")
 AKURASI_ANAK = 0.865
@@ -22,6 +28,10 @@ AKURASI_ANAK = 0.865
 ibu_model = joblib.load("ibu_random_forest.pkl")
 ibu_scaler = joblib.load("ibu_scaler.pkl")
 AKURASI_IBU = 0.8473
+
+# ======================================================
+# SIDEBAR MENU
+# ======================================================
 menu = st.sidebar.radio(
     "Pilih Menu:",
     ["👶🏻 Prediksi Stunting Anak", "🤰🏻 Prediksi Risiko Kesehatan Ibu"]
@@ -30,6 +40,9 @@ menu = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.caption("Developed with 💖 using Streamlit")
 
+# ======================================================
+# 👶🏻 MENU 1 – PREDIKSI STUNTING ANAK
+# ======================================================
 if menu == "👶🏻 Prediksi Stunting Anak":
 
     st.header("👶🏻 Prediksi Stunting Anak")
@@ -39,6 +52,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
     dan **aturan pertumbuhan (rule-based override)** untuk mencegah
     kesalahan prediksi pada anak dengan pertumbuhan normal.
     """)
+
+    # -----------------------------
+    # INPUT DATA ANAK
+    # -----------------------------
     gender_map = {"Laki-laki": 0, "Perempuan": 1}
     gender = st.selectbox("Jenis Kelamin", list(gender_map.keys()))
 
@@ -51,11 +68,17 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
     g = gender_map[gender]
     bf = 1 if breastfeeding == "Ya" else 0
+
+    # -----------------------------
+    # PREDIKSI ANAK
+    # -----------------------------
     if st.button("🔍 Prediksi Stunting Anak"):
 
         data = np.array([[g, age, birth_weight, birth_length, body_weight, body_length, bf]])
         data_scaled = anak_scaler.transform(data)
         pred_model = anak_model.predict(data_scaled)[0]
+
+        # RULE-BASED OVERRIDE (TIDAK DIPAKSAKAN)
         is_override_normal = (
             age >= 12 and
             body_length >= 75 and
@@ -68,6 +91,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         else:
             final_pred = pred_model
             decision_source = "Prediksi model machine learning"
+
+        # -----------------------------
+        # OUTPUT ANAK
+        # -----------------------------
         st.metric("Akurasi Model (Validasi)", f"{AKURASI_ANAK*100:.2f}%")
 
         if final_pred == 1:
@@ -76,6 +103,16 @@ if menu == "👶🏻 Prediksi Stunting Anak":
             st.success("✅ Anak **tidak stunting**.")
 
         st.caption(f"Sumber keputusan: **{decision_source}**")
+
+        # EDUKASI TAMBAHAN (TIDAK MEMAKSA)
+        st.info(
+            "Catatan: Stunting ditentukan terutama oleh **tinggi badan terhadap usia**, "
+            "bukan oleh berat badan saja."
+        )
+
+        # -----------------------------
+        # REKOMENDASI ANAK
+        # -----------------------------
         st.subheader("🩺 Rekomendasi Kesehatan Anak")
 
         if final_pred == 1:
@@ -113,6 +150,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
 
             💡 *Pertumbuhan optimal dipengaruhi gizi, stimulasi, dan pola asuh.*
             """)
+
+        # -----------------------------
+        # DETAIL INPUT ANAK
+        # -----------------------------
         st.subheader("📊 Detail Input Anak")
         col1, col2, col3 = st.columns(3)
         col1.metric("Usia", f"{age} bulan")
@@ -124,6 +165,10 @@ if menu == "👶🏻 Prediksi Stunting Anak":
         "⚠️ Aplikasi ini hanya alat bantu skrining awal dan "
         "**tidak menggantikan diagnosis dokter**."
     )
+
+# ======================================================
+# 🤰🏻 MENU 2 – PREDIKSI RISIKO KESEHATAN IBU
+# ======================================================
 elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
 
     st.header("🤰🏻 Prediksi Risiko Kesehatan Ibu")
@@ -134,19 +179,31 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
 
     Hasil prediksi digunakan sebagai **skrining awal**, bukan diagnosis medis.
     """)
+
+    # -----------------------------
+    # INPUT DATA IBU (CELSIUS)
+    # -----------------------------
     age = st.number_input("Usia Ibu (tahun)", 15, 50, 28)
     sys = st.number_input("Systolic Blood Pressure (mmHg)", 80, 200, 120)
     dia = st.number_input("Diastolic Blood Pressure (mmHg)", 50, 130, 80)
     bs = st.number_input("Blood Sugar", 1.0, 30.0, 7.0)
-    temp = st.number_input("Temperatur Tubuh (°F)", 90.0, 110.0, 98.0)
+
+    temp_c = st.number_input("Temperatur Tubuh (°C)", 30.0, 45.0, 36.5)
+    temp_f = (temp_c * 9 / 5) + 32  # KONVERSI KE FAHRENHEIT
+
     heart = st.number_input("Heart Rate (bpm)", 50, 200, 100)
+
+    # -----------------------------
+    # PREDIKSI IBU
+    # -----------------------------
     if st.button("🔍 Prediksi Risiko Ibu"):
 
-        data = np.array([[age, sys, dia, bs, temp, heart]])
+        data = np.array([[age, sys, dia, bs, temp_f, heart]])
         data_scaled = ibu_scaler.transform(data)
         pred = ibu_model.predict(data_scaled)[0]
 
         st.metric("Akurasi Model (Validasi)", f"{AKURASI_IBU*100:.2f}%")
+
         if pred == 0:
             st.success("🟢 Risiko Rendah")
             st.caption("Kondisi vital ibu berada dalam batas aman.")
@@ -156,6 +213,10 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
         else:
             st.error("🔴 Risiko Tinggi")
             st.caption("Parameter vital menunjukkan potensi risiko serius.")
+
+        # -----------------------------
+        # REKOMENDASI IBU
+        # -----------------------------
         st.subheader("🩺 Saran Kesehatan Ibu")
 
         if pred == 0:
@@ -179,11 +240,15 @@ elif menu == "🤰🏻 Prediksi Risiko Kesehatan Ibu":
             - Hindari aktivitas berat  
             - Waspadai tanda bahaya kehamilan  
             """)
+
+        # -----------------------------
+        # DETAIL INPUT IBU
+        # -----------------------------
         st.subheader("📊 Ringkasan Data Ibu")
         col1, col2, col3 = st.columns(3)
         col1.metric("Usia", f"{age} tahun")
         col2.metric("Tekanan Darah", f"{sys}/{dia} mmHg")
-        col3.metric("Gula Darah", f"{bs}")
+        col3.metric("Suhu Tubuh", f"{temp_c} °C")
 
     st.markdown("---")
     st.caption(
